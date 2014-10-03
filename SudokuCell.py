@@ -2,6 +2,7 @@
 class SudokuCell :
     def __init__( self, row, col, initValue = None ) :
         """ Represents a cell in a sudoku puzzle.
+			Hey!
 	    Initializes a new sudoku cell, all posibilities are there
             The possible values are actually kept as a set of values from [1..9] """
         self.__initValue = initValue # If the cell is not "solved" this value will be None
