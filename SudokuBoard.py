@@ -2,6 +2,8 @@
 """
 Just diving into python ... a couple of classes to represent and solve
 a Sudoku puzzle using python ...
+
+Hmm ...
 """
 
 from SudokuCell import SudokuCell
