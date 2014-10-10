@@ -1,38 +1,36 @@
 import unittest
 
-class SudokuBoard :
-    def __init__(self, initString = None):
-        if initString == None:
-            self.__initString = "................................................................................."
+
+class SudokuBoard:
+    def __init__(self, initial_state=None):
+        if initial_state is None:
+            self.__initial_state = "................................................................................."
         else:
-            # Could do some more validation
-            self.__initString = initString;
+            self.__initial_state = initial_state
 
-    def initString(self):
-        return self.__initString
+    def initial_state(self):
+        return self.__initial_state
 
-    def prettyInitString(self):
+    def pretty_initial_state(self):
         pass
 
-    def printNice(self ) :
-        """ Prints the SudokPuzzle to STDOUT in a nice table format """
-        print "+---"*9 + "+"
-        for i in range( 0, 9 ) :
-            print "|", " | ".join( [ str( c ) for c in self.__initString[i] ] ), "|"
-            print "+---"*9 + "+"
+    def print_nice(self):
+        """ Prints the SudokuPuzzle to STDOUT in a nice table format """
+        print "+---" * 9 + "+"
+        for i in range(0, 9):
+            print "|", " | ".join([str(c) for c in self.__initial_state[i]]), "|"
+            print "+---" * 9 + "+"
+
 
 class SudokuBoardTests(unittest.TestCase):
-
     def setUp(self):
         pass
 
-    def testInit(self):
-        self.assertEqual(SudokuBoard().initString(), ".................................................................................")
+    def test_init(self):
+        self.assertEqual(SudokuBoard().initial_state(),
+                         ".................................................................................")
 
-    def testPretty(self):
-        pass
-
-    def testAnotherthing(self):
+    def test_pretty(self):
         pass
 
     def tearDown(self):
