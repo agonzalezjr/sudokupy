@@ -2,7 +2,8 @@ import unittest
 
 
 class SudokuCell:
-    pass
+    def __init__(self):
+        pass
 
 
 class SudokuCellTests(unittest.TestCase):
