@@ -1,14 +1,11 @@
 
-"""
-Just diving into python ... a couple of classes to represent and solve
-a Sudoku puzzle using python ...
-
-Hmm ...
-"""
-
 from SudokuCell import SudokuCell
 
 class SudokuBoard :
+	""" Represents a sudoku board which is made of cells.
+		It has the logic for solving the puzzle and printing
+		the board at any given point in time. """
+			
     # Class constants - Is there a better way for this in python?
     SIZE = 9
     
