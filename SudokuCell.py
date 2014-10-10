@@ -2,13 +2,13 @@
 class SudokuCell :
     def __init__( self, row, col, initValue = None ) :
         """ Represents a cell in a sudoku puzzle.
-			Hey!
-	    Initializes a new sudoku cell, all posibilities are there
+            Hey!
+        Initializes a new sudoku cell, all posibilities are there
             The possible values are actually kept as a set of values from [1..9] """
         self.__initValue = initValue # If the cell is not "solved" this value will be None
         self.__row = row # The row and column of the cell in the puzzle
         self.__col = col # The row and column are immutable
-	# __pos is the possible values the cell could take
+    # __pos is the possible values the cell could take
         if self.__initValue != None :
             self._pos = set( [ int( self.__initValue ) ] )
         else :
@@ -21,7 +21,7 @@ class SudokuCell :
         self._pos = set( [ value ] )    
     
     def reducePos( self, value ) :
-    	""" Given a value, it reduces it from the possible ones """
+        """ Given a value, it reduces it from the possible ones """
         self._pos = self._pos.difference( set( [ value ] ) )
         
     def getPosition( self ) :
@@ -29,12 +29,12 @@ class SudokuCell :
         return ( self.__row, self.__col )
     
     def getBigCell( self ) :
-    	""" BigCell is the 3x3 group this cell belongs to. This returns its position """
+        """ BigCell is the 3x3 group this cell belongs to. This returns its position """
         return ( self.__row / 3, self.__col / 3 )
     
     def getNeighborsPositions( self ) :
-    	""" Return a list containig the neighbors' positions
-	    Neighbors are other cells in the same row, column, or BigCell """
+        """ Return a list containig the neighbors' positions
+        Neighbors are other cells in the same row, column, or BigCell """
         np = [ ]
         
         # get neigbohrs in the same row
@@ -63,7 +63,7 @@ class SudokuCell :
             return None
         
     def getPosString( self ) :
-    	""" Returns a string containing the posibilities still available in this cell """
+        """ Returns a string containing the posibilities still available in this cell """
         ps = ""
         for i in range( 1, 10 ) :
             if i in self._pos :
@@ -74,8 +74,8 @@ class SudokuCell :
             
         
     def __str__( self ) :
-    	""" Returns the string representation of the cell. If solve this is the value,
-	    if not solved, this is just '?' """
+        """ Returns the string representation of the cell. If solve this is the value,
+        if not solved, this is just '?' """
         if self.isSolved( ) :
             sol = self._pos.pop( )
             self._pos.add( sol )
