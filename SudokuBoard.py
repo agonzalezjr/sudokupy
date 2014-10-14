@@ -1,8 +1,12 @@
+from SudokuCell import SudokuCell
 import unittest
 
 
 class SudokuBoard:
     EMPTY_BOARD = "................................................................................."
+    DIGITS = '123456789'
+    ROWS = 'ABCDEFGHI'
+    COLUMNS = DIGITS
 
     def __init__(self, initial_state=None):
         self.__state = self.EMPTY_BOARD
@@ -11,6 +15,13 @@ class SudokuBoard:
         else:
             self.__initial_state = initial_state
 
+        # create the cells
+        self.__cells = []
+        for r in self.ROWS:
+            for c in self.COLUMNS:
+                self.__cells.append(SudokuCell(r + c))
+
+
     @property
     def initial_state(self):
         return self.__initial_state
@@ -18,6 +29,10 @@ class SudokuBoard:
     @property
     def state(self):
         return self.__state
+
+    @property
+    def cells(self):
+        return self.__cells
 
     def pretty_initial_state(self):
         return self.__pretty_helper(self.initial_state)
@@ -44,11 +59,11 @@ class SudokuBoardTests(unittest.TestCase):
         pass
 
     def test_init(self):
+        self.assertEqual(len(SudokuBoard().initial_state), 81)
         self.assertEqual(SudokuBoard().initial_state, SudokuBoard.EMPTY_BOARD)
 
-    def test_pretty(self):
-        b1 = SudokuBoard()
-        self.assertEqual(b1.pretty(), "")
+    def test_cells(self):
+        self.assertEqual(len(SudokuBoard().cells), 81)
 
     def tearDown(self):
         pass
