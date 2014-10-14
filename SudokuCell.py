@@ -1,11 +1,14 @@
 import unittest
 
+# TODO: Make this a 'hashable' object
 
 class SudokuCell:
-    def __init__(self, name):
+    def __init__(self, name, choices = 9):
         assert(name is not None and len(name) == 2)
         self.__name = name
-        self.__choices = set(range(1, 10))
+        self.__choices = ''
+        for i in range(1, choices + 1):
+            self.__choices += str(i)
 
     @property
     def name(self):
@@ -15,9 +18,6 @@ class SudokuCell:
     def choices(self):
         return self.__choices
 
-    def is_solved(self):
-        return len(self.choices) == 1
-
 
 class SudokuCellTests(unittest.TestCase):
     def setUp(self):
@@ -26,13 +26,7 @@ class SudokuCellTests(unittest.TestCase):
     def test_init(self):
         c = SudokuCell('A1')
         self.assertEqual(c.name, 'A1')
-        self.assertEqual(len(c.choices), 9)
-        for d in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
-            self.assertTrue(d in c.choices)
-
-    def test_solve(self):
-        c = SudokuCell('A1')
-        self.assertFalse(c.is_solved())
+        self.assertEqual(c.choices, '123456789')
 
     def tearDown(self):
         pass
