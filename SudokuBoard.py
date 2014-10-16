@@ -3,10 +3,10 @@ import unittest
 
 
 class SudokuBoard:
-    EMPTY_BOARD = "................................................................................."
     DIGITS = '123456789'
     ROWS = 'ABCDEFGHI'
     COLUMNS = DIGITS
+    EMPTY_BOARD = '.' * len(ROWS) * len(COLUMNS)
 
     def __init__(self, initial_state=None):
         if initial_state is None:
@@ -28,11 +28,13 @@ class SudokuBoard:
         unit_list = self.__get_unit_list()
 
         # let each cell know of the units it belongs to
+        # (from this they will figure out all their peers)
         for cell in self.cells:
             for unit in unit_list:
                 if cell in unit:
                     cell.add_unit(unit)
 
+        # TODO: Solve the damn thing!!
         # Assign the initial values to each cell
         for i in range(0, len(self.initial_state)):
             if self.initial_state[i] in self.DIGITS:
