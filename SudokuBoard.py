@@ -68,7 +68,7 @@ class SudokuBoard:
         # Create the peers for each cell
         self.__peers = {}
         for cell in self.squares:
-            self.__peers[cell] = set(sum(self.units[cell],[]))-set([cell])
+            self.__peers[cell] = set(sum(self.units[cell], [])) - set([cell])
 
 
     @property
@@ -110,6 +110,23 @@ class SudokuBoard:
                 if r > 0 and r % 3 == 0:
                     ret += "| "
                 ret += state[c * 9 + r] + " "
+            ret += "\n"
+
+        return ret
+
+    def pretty_values(self):
+        ret = ""
+        # The length of the widest cell
+        width = max(len(cell.values) for cell in self.squares) + 1
+
+        # The separator (some cool string operations with literals)
+        line = "\n" + '+'.join(['-' * (width * 3)] * 3)
+
+        for r in self.ROWS:
+            ret += ''.join(self.squares_hash[r + c].values.center(width) + ('|' if c in '36' else '')
+                           for c in self.COLUMNS)
+            if r in 'CF':
+                ret += line
             ret += "\n"
 
         return ret
