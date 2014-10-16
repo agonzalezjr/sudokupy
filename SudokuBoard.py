@@ -9,7 +9,6 @@ class SudokuBoard:
     COLUMNS = DIGITS
 
     def __init__(self, initial_state=None):
-        self.__state = self.EMPTY_BOARD
         if initial_state is None:
             self.__initial_state = self.EMPTY_BOARD
         else:
@@ -70,6 +69,12 @@ class SudokuBoard:
         for cell in self.squares:
             self.__peers[cell] = set(sum(self.units[cell], [])) - set([cell])
 
+        # Assign the initial values to each cell
+        for i in range(0, len(self.initial_state)):
+            if self.initial_state[i] in self.DIGITS:
+                self.squares[i].assign(self.initial_state[i])
+
+
 
     @property
     def initial_state(self):
@@ -77,7 +82,14 @@ class SudokuBoard:
 
     @property
     def state(self):
-        return self.__state
+        # Tge old way
+        # ret = ""
+        # for c in self.squares:
+        #     ret += c.values if c.is_solved() else '.'
+        # return ret
+
+        # The Python way
+        return ''.join(cell.values if cell.is_solved() else '.' for cell in self.squares)
 
     @property
     def squares(self):
