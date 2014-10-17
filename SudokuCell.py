@@ -5,10 +5,9 @@ import collections
 
 
 class SudokuCell:
-    def __init__(self, name, board=None, choices=9):
+    def __init__(self, name, choices=9):
         assert (name is not None and len(name) == 2)
         self.__name = name
-        self.__board = board
         self.__values = ''.join(str(d) for d in range(1, choices + 1))
         self.__peers = set()
         self.__units = []
@@ -45,10 +44,6 @@ class SudokuCell:
     def eliminate(self, value):
         assert (len(value) == 1)
 
-        if self.__board:
-            print "Will ELIMINATE ", value, " from cell ", self.name, "... These are the current values:"
-            print self.__board.pretty_values()
-
         # Can't eliminate the last value
         if self.values == value:
             return False
@@ -67,16 +62,14 @@ class SudokuCell:
                     # Contradiction: no place for this value
                     return False
                 elif len(d_places) == 1 and not d_places[0].is_solved():
+                    # We have only one choice and it's not because it's in
+                    # a cell we already solved. Yay for new information!!
                     return d_places[0].assign(d)
 
         return True
 
     def assign(self, value):
         assert (len(value) == 1)
-
-        if self.__board:
-            print "Will ASSIGN ", value, " to cell ", self.name, "... These are the current values:"
-            print self.__board.pretty_values()
 
         # Can't assign a value that's not a possibility
         if value not in self.values:

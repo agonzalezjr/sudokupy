@@ -20,7 +20,7 @@ class SudokuBoard:
         for r in self.ROWS:
             for c in self.COLUMNS:
                 cell_name = r + c
-                cell = SudokuCell(cell_name, self)
+                cell = SudokuCell(cell_name)
                 self.__cells.append(cell)
                 self.__cellsHash[cell_name] = cell
 
@@ -127,21 +127,23 @@ class SudokuBoard:
     def is_solved(self):
         return all(cell.is_solved() for cell in self.cells)
 
-    def solve(self, debug_mode):
-        # TODO: in case we need to re-iterate
-        # iter = 0
-        # while(not self.is_solved()):
+    def solve(self, debug_mode=False):
 
-        for i, d in enumerate(self.initial_state):
-            if d in self.DIGITS:
-                self.cells[i].assign(d)
+        for i, value in enumerate(self.initial_state):
+            if value in self.DIGITS:
                 if debug_mode:
-                    print(self.pretty_values())
+                    print "Will ASSIGN ", value, " to cell ", self.cells[i].name, "... These are the current values:"
+                    print self.__board.pretty_values()
+                self.cells[i].assign(value)
+
 
 # TODO: Revert the expected and actual values
 
 
 class SudokuBoardTests(unittest.TestCase):
+    EASY = [("..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..",
+             "483921657967345821251876493548132976729564138136798245372689514814253769695417382")]
+
     def setUp(self):
         pass
 
@@ -171,8 +173,11 @@ class SudokuBoardTests(unittest.TestCase):
         self.assertTrue(all(len(c.peers) == 20 and c not in c.peers for c in b.cells))
 
     def test_solve(self):
-        b = SudokuBoard()
-        self.assertFalse(b.is_solved())
+        for puzzle, answer in self.EASY:
+            b = SudokuBoard(puzzle)
+            b.solve()
+            self.assertTrue(b.is_solved())
+            self.assertEqual(answer, b.state)
 
     def tearDown(self):
         pass
