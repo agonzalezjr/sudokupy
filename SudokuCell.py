@@ -101,10 +101,14 @@ class SudokuCellTests(unittest.TestCase):
         c = SudokuCell('A1')
         self.assertFalse(c.is_solved())
 
-        self.assertEqual('23456789', c.eliminate('1'))
-        self.assertEqual('23456789', c.eliminate('1'))
-        self.assertEqual('2356789', c.eliminate('4'))
-        self.assertEqual('235678', c.eliminate('9'))
+        c.eliminate('1')
+        self.assertEqual('23456789', c.values)
+        c.eliminate('1')
+        self.assertEqual('23456789', c.values)
+        c.eliminate('4')
+        self.assertEqual('2356789', c.values)
+        c.eliminate('9')
+        self.assertEqual('235678', c.values)
         self.assertFalse(c.is_solved())
 
         self.assertFalse(c.assign('9'))
@@ -114,7 +118,8 @@ class SudokuCellTests(unittest.TestCase):
         self.assertTrue(c.is_solved())
         self.assertEqual('6', c.values)
 
-        self.assertEqual('6', c.eliminate('5'))
+        c.eliminate('5')
+        self.assertEqual('6', c.values)
         self.assertFalse(c.eliminate('6'))
 
     def test_peers(self):
