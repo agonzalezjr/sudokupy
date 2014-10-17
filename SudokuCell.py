@@ -5,9 +5,10 @@ import collections
 
 
 class SudokuCell:
-    def __init__(self, name, choices=9):
+    def __init__(self, name, board=None, choices=9):
         assert (name is not None and len(name) == 2)
         self.__name = name
+        self.__board = board
         self.__values = ''.join(str(d) for d in range(1, choices + 1))
         self.__peers = set()
         self.__units = []
@@ -44,24 +45,50 @@ class SudokuCell:
     def eliminate(self, value):
         assert (len(value) == 1)
 
+        if self.__board:
+            print "Will ELIMINATE ", value, " from cell ", self.name, "... These are the current values:"
+            print self.__board.pretty_values()
+
         # Can't eliminate the last value
         if self.values == value:
             return False
 
         self.__values = self.values.replace(value, '')
 
-        # Yes, we can have different return values for one function
-        return self.values
+        # Check this cell's units, if there is only one
+        # possibility for some value there now, then assign
+        # that value to that lucky cell
+        for unit in self.units:
+            for d in '123456789':
+                # d_places is an array of all the cells in the unit
+                # that aren't solved already where value d is a possibility
+                d_places = [cell for cell in unit if d in cell.values]
+                if len(d_places) == 0:
+                    # Contradiction: no place for this value
+                    return False
+                elif len(d_places) == 1 and not d_places[0].is_solved():
+                    return d_places[0].assign(d)
+
+        return True
 
     def assign(self, value):
         assert (len(value) == 1)
+
+        if self.__board:
+            print "Will ASSIGN ", value, " to cell ", self.name, "... These are the current values:"
+            print self.__board.pretty_values()
 
         # Can't assign a value that's not a possibility
         if value not in self.values:
             return False
 
         self.values = value
-        # no return value: means return 'None'
+
+        # We can eliminate this value from all of this cell's peers
+        for peer in self.peers:
+            peer.eliminate(value)
+
+        # BTW: no return value: means return 'None'
 
     def is_solved(self):
         return len(self.values) == 1

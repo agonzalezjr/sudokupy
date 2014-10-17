@@ -20,7 +20,7 @@ class SudokuBoard:
         for r in self.ROWS:
             for c in self.COLUMNS:
                 cell_name = r + c
-                cell = SudokuCell(cell_name)
+                cell = SudokuCell(cell_name, self)
                 self.__cells.append(cell)
                 self.__cellsHash[cell_name] = cell
 
@@ -33,13 +33,6 @@ class SudokuBoard:
             for unit in unit_list:
                 if cell in unit:
                     cell.add_unit(unit)
-
-        # TODO: Solve the damn thing!!
-        # Assign the initial values to each cell
-        for i in range(0, len(self.initial_state)):
-            if self.initial_state[i] in self.DIGITS:
-                self.cells[i].assign(self.initial_state[i])
-
 
     @property
     def initial_state(self):
@@ -131,7 +124,22 @@ class SudokuBoard:
 
         return unit_list
 
+    def is_solved(self):
+        return all(cell.is_solved() for cell in self.cells)
+
+    def solve(self, debug_mode):
+        # TODO: in case we need to re-iterate
+        # iter = 0
+        # while(not self.is_solved()):
+
+        for i, d in enumerate(self.initial_state):
+            if d in self.DIGITS:
+                self.cells[i].assign(d)
+                if debug_mode:
+                    print(self.pretty_values())
+
 # TODO: Revert the expected and actual values
+
 
 class SudokuBoardTests(unittest.TestCase):
     def setUp(self):
@@ -140,6 +148,7 @@ class SudokuBoardTests(unittest.TestCase):
     def test_init(self):
         self.assertEqual(len(SudokuBoard().initial_state), 81)
         self.assertEqual(SudokuBoard().initial_state, SudokuBoard.EMPTY_BOARD)
+        self.assertFalse(SudokuBoard().is_solved())
 
     def test_cells(self):
         b = SudokuBoard()
@@ -160,6 +169,10 @@ class SudokuBoardTests(unittest.TestCase):
     def test_peers(self):
         b = SudokuBoard()
         self.assertTrue(all(len(c.peers) == 20 and c not in c.peers for c in b.cells))
+
+    def test_solve(self):
+        b = SudokuBoard()
+        self.assertFalse(b.is_solved())
 
     def tearDown(self):
         pass
