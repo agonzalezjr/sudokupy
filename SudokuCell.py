@@ -1,8 +1,6 @@
 import unittest
 import collections
 
-# TODO: Make this a 'hashable' object using the name as the hash
-
 
 class SudokuCell:
     def __init__(self, name, choices=9):
@@ -11,6 +9,9 @@ class SudokuCell:
         self.__values = ''.join(str(d) for d in range(1, choices + 1))
         self.__peers = set()
         self.__units = []
+
+    def __repr__(self):
+        return self.__name
 
     @property
     def name(self):
@@ -79,9 +80,13 @@ class SudokuCell:
 
         # We can eliminate this value from all of this cell's peers
         for peer in self.peers:
-            peer.eliminate(value)
+            if not peer.eliminate(value):
+                # There was a problem eliminating this value
+                # from the peers, so the assignation was wrong
+                return False
 
-        # BTW: no return value: means return 'None'
+        # All was good assigning this value to this call
+        return True
 
     def is_solved(self):
         return len(self.values) == 1

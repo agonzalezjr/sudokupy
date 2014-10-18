@@ -1,4 +1,5 @@
 from SudokuCell import SudokuCell
+import copy
 import unittest
 
 
@@ -16,13 +17,11 @@ class SudokuBoard:
 
         # create the cells
         self.__cells = []
-        self.__cellsHash = {}
         for r in self.ROWS:
             for c in self.COLUMNS:
                 cell_name = r + c
                 cell = SudokuCell(cell_name)
                 self.__cells.append(cell)
-                self.__cellsHash[cell_name] = cell
 
         # create the units of the board
         unit_list = self.__get_unit_list()
@@ -40,22 +39,17 @@ class SudokuBoard:
 
     @property
     def state(self):
-        # Tge old way
-        # ret = ""
-        # for c in self.squares:
-        # ret += c.values if c.is_solved() else '.'
-        # return ret
-
-        # The Python way
         return ''.join(cell.values if cell.is_solved() else '.' for cell in self.cells)
 
     @property
     def cells(self):
         return self.__cells
 
-    @property
-    def cells_hash(self):
-        return self.__cellsHash
+    def cell_by_name(self, name):
+        assert (len(name) == 2)
+        assert (name[0] in self.ROWS)
+        assert (name[1] in self.COLUMNS)
+        return self.__cells[self.ROWS.index(name[0])*9 + self.COLUMNS.index(name[1])]
 
     def pretty_initial_state(self):
         return self.__pretty_helper(self.initial_state)
@@ -73,7 +67,6 @@ class SudokuBoard:
                     ret += "| "
                 ret += state[c * 9 + r] + " "
             ret += "\n"
-
         return ret
 
     def pretty_values(self):
@@ -85,7 +78,7 @@ class SudokuBoard:
         line = "\n" + '+'.join(['-' * (width * 3)] * 3)
 
         for r in self.ROWS:
-            ret += ''.join(self.cells_hash[r + c].values.center(width) + ('|' if c in '36' else '')
+            ret += ''.join(self.cell_by_name(r + c).values.center(width) + ('|' if c in '36' else '')
                            for c in self.COLUMNS)
             if r in 'CF':
                 ret += line
@@ -101,7 +94,7 @@ class SudokuBoard:
             thisunit = []
             for r in self.ROWS:
                 cell_name = r + c
-                thisunit.append(self.cells_hash[cell_name])
+                thisunit.append(self.cell_by_name(cell_name))
             unit_list.append(thisunit)
 
         # then the columns
@@ -109,7 +102,7 @@ class SudokuBoard:
             thisunit = []
             for c in self.COLUMNS:
                 cell_name = r + c
-                thisunit.append(self.cells_hash[cell_name])
+                thisunit.append(self.cell_by_name(cell_name))
             unit_list.append(thisunit)
 
         # then the big sqares
@@ -119,7 +112,7 @@ class SudokuBoard:
                 for r in rs:
                     for c in cs:
                         cell_name = r + c
-                        thisunit.append(self.cells_hash[cell_name])
+                        thisunit.append(self.cell_by_name(cell_name))
                 unit_list.append(thisunit)
 
         return unit_list
@@ -129,13 +122,34 @@ class SudokuBoard:
 
     def solve(self, debug_mode=False):
 
+        if self.is_solved():
+            return True
+
+        # Propagate constraints for the cell with the current state of the board
         for i, value in enumerate(self.initial_state):
             if value in self.DIGITS:
                 if debug_mode:
                     print "Will ASSIGN ", value, " to cell ", self.cells[i].name, "... These are the current values:"
-                    print self.__board.pretty_values()
-                self.cells[i].assign(value)
+                    print self.pretty_values()
+                if not self.cells[i].assign(value):
+                    # We hit a contradiction assigning this value to a cell,
+                    # Either it was a bad guess or the puzzle is malformed
+                    return False
+                if self.is_solved():
+                    # It's solved with the constraints!
+                    return True
 
+        # Chose a solved cell with the fewest possibilities ...
+        minimum, easiest = min((len(cell.values), cell) for cell in self.cells if not cell.is_solved())
+        # ... and create a new puzzle out of using this guess ...
+        for guess in easiest.values:
+            guess_state_l = list(self.state)
+            guess_state_l[self.ROWS.index(easiest.name[0])*9 + self.COLUMNS.index(easiest.name[1])] = guess
+            new_board = SudokuBoard(''.join(guess_state_l))
+            if new_board.solve(debug_mode):
+                # ... if it solves the puzzle, steal the cells from the new board.
+                self.__cells = new_board.cells
+                return True
 
 # TODO: Revert the expected and actual values
 
@@ -143,6 +157,9 @@ class SudokuBoard:
 class SudokuBoardTests(unittest.TestCase):
     EASY = [("..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..",
              "483921657967345821251876493548132976729564138136798245372689514814253769695417382")]
+
+    HARD = [("4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+             "417369825632158947958724316825437169791586432346912758289643571573291684164875293")]
 
     def setUp(self):
         pass
@@ -158,22 +175,28 @@ class SudokuBoardTests(unittest.TestCase):
         self.assertEqual(b.cells[0].name, 'A1')
         self.assertEqual(b.cells[23].name, 'C6')
         self.assertEqual(b.cells[80].name, 'I9')
-        self.assertEqual(b.cells_hash['B5'].name, 'B5')
 
     def test_units(self):
         b = SudokuBoard()
         self.assertTrue(all(len(c.units) == 3 for c in b.cells))
-        c2 = b.cells_hash['C2']
-        self.assertEqual(c2.units[0][0], b.cells_hash['A2'])
-        self.assertEqual(c2.units[1][2], b.cells_hash['C3'])
-        self.assertEqual(c2.units[2][8], b.cells_hash['C3'])
+        c2 = b.cell_by_name('C2')
+        self.assertEqual(c2.units[0][0], b.cell_by_name('A2'))
+        self.assertEqual(c2.units[1][2], b.cell_by_name('C3'))
+        self.assertEqual(c2.units[2][8], b.cell_by_name('C3'))
 
     def test_peers(self):
         b = SudokuBoard()
         self.assertTrue(all(len(c.peers) == 20 and c not in c.peers for c in b.cells))
 
-    def test_solve(self):
+    def test_solve_easy(self):
         for puzzle, answer in self.EASY:
+            b = SudokuBoard(puzzle)
+            b.solve()
+            self.assertTrue(b.is_solved())
+            self.assertEqual(answer, b.state)
+
+    def test_solve_hard(self):
+        for puzzle, answer in self.HARD:
             b = SudokuBoard(puzzle)
             b.solve()
             self.assertTrue(b.is_solved())
