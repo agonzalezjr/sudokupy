@@ -29,10 +29,9 @@ class SudokuCell:
     def units(self):
         return self.__units
 
-    # TODO: Make this private
-    def add_peers(self, p):
+    def __add_peers(self, p):
         if isinstance(p, collections.Iterable):
-            map(self.add_peers, p)
+            map(self.__add_peers, p)
         elif isinstance(p, self.__class__):
             if self.__name != p.name:
                 # can't be a peer to itself
@@ -40,7 +39,7 @@ class SudokuCell:
 
     def add_unit(self, u):
         self.__units.append(u)
-        self.add_peers(u)
+        self.__add_peers(u)
 
     def eliminate(self, value):
         assert (len(value) == 1)
@@ -76,7 +75,7 @@ class SudokuCell:
         if value not in self.values:
             return False
 
-        self.values = value
+        self.__values = value
 
         # We can eliminate this value from all of this cell's peers
         for peer in self.peers:
@@ -127,16 +126,23 @@ class SudokuCellTests(unittest.TestCase):
         self.assertEqual('6', c.values)
         self.assertFalse(c.eliminate('6'))
 
+    def test_units(self):
+        c = SudokuCell('A1')
+        self.assertTrue(len(c.units) == 0)
+
+        c.add_unit([c, c])
+        self.assertTrue(len(c.units) == 1)
+
     def test_peers(self):
         c = SudokuCell('A1')
         p1 = SudokuCell('B1')
 
-        c.add_peers(p1)
+        c.add_unit([p1])
         self.assertTrue(p1 in c.peers)
 
         p2 = SudokuCell('B2')
         p3 = SudokuCell('B3')
-        c.add_peers([p2, p3])
+        c.add_unit([p2, p3])
         self.assertTrue(p2 in c.peers)
         self.assertTrue(p3 in c.peers)
 
@@ -144,13 +150,6 @@ class SudokuCellTests(unittest.TestCase):
         self.assertTrue(p1 not in p1.peers)
         self.assertTrue(p2 not in p2.peers)
         self.assertTrue(p3 not in p3.peers)
-
-    def test_units(self):
-        c = SudokuCell('A1')
-        self.assertTrue(len(c.units) == 0)
-
-        c.add_unit([c, c])
-        self.assertTrue(len(c.units) == 1)
 
     def tearDown(self):
         pass
