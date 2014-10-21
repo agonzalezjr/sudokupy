@@ -1,19 +1,32 @@
 from SudokuCell import SudokuCell
-import copy
 import unittest
 
 
 class SudokuBoard:
+    """
+    A Sudoku board
+    """
+
     DIGITS = '123456789'
     ROWS = 'ABCDEFGHI'
     COLUMNS = DIGITS
     EMPTY_BOARD = '.' * len(ROWS) * len(COLUMNS)
 
     def __init__(self, initial_state=None):
+        """
+        Create a SudokuBoard
+        :param initial_state: a string with the initial state of the puzzle.
+        A '.' represents and empty cell. A character in DIGITS represents a solved
+        cell.
+        :return: SudokuBoard
+        """
+
         if initial_state is None:
             self.__initial_state = self.EMPTY_BOARD
         else:
             self.__initial_state = initial_state
+
+        assert len(self.initial_state) == len(self.ROWS) * len(self.COLUMNS)
 
         # create the cells
         self.__cells = []
@@ -87,6 +100,12 @@ class SudokuBoard:
         return ret
 
     def __get_unit_list(self):
+        """
+        :return: An array of all the units in the board. These are
+        the groups of 9 cells that must contain unique values (all
+        rows, all columns, and all 3x3 groupings, so there is 27 of
+        these)
+        """
         unit_list = []
 
         # Each row is a unit
@@ -116,11 +135,17 @@ class SudokuBoard:
                 unit_list.append(thisunit)
 
         return unit_list
-
     def is_solved(self):
+        """ Return True if the puzzle is solved """
         return all(cell.is_solved() for cell in self.cells)
 
     def solve(self, debug_mode=False):
+        """
+        Actually solve the puzzle using the information in the initial_state.
+        It will first assign constraints and if needed search after that.
+        :param debug_mode: Pass True to see progress and possibilities after each round
+        :return: False if the puzzle is impossible
+        """
 
         if self.is_solved():
             return True
@@ -136,9 +161,10 @@ class SudokuBoard:
                     # Either it was a bad guess or the puzzle is malformed
                     return False
                 if self.is_solved():
-                    # It's solved with the constraints!
+                    # It's solved with the constraints we have applied so far
                     return True
 
+        # The board is still not solved, we'll search for a solution ...
         # Chose a solved cell with the fewest possibilities ...
         minimum, easiest = min((len(cell.values), cell) for cell in self.cells if not cell.is_solved())
         # ... and create a new puzzle out of using this guess ...
@@ -150,8 +176,6 @@ class SudokuBoard:
                 # ... if it solves the puzzle, steal the cells from the new board.
                 self.__cells = new_board.cells
                 return True
-
-# TODO: Revert the expected and actual values
 
 
 class SudokuBoardTests(unittest.TestCase):
@@ -165,24 +189,24 @@ class SudokuBoardTests(unittest.TestCase):
         pass
 
     def test_init(self):
-        self.assertEqual(len(SudokuBoard().initial_state), 81)
-        self.assertEqual(SudokuBoard().initial_state, SudokuBoard.EMPTY_BOARD)
+        self.assertEqual(81, len(SudokuBoard().initial_state))
+        self.assertEqual(SudokuBoard.EMPTY_BOARD, SudokuBoard().initial_state)
         self.assertFalse(SudokuBoard().is_solved())
 
     def test_cells(self):
         b = SudokuBoard()
-        self.assertEqual(len(b.cells), 81)
-        self.assertEqual(b.cells[0].name, 'A1')
-        self.assertEqual(b.cells[23].name, 'C6')
-        self.assertEqual(b.cells[80].name, 'I9')
+        self.assertEqual(81, len(b.cells))
+        self.assertEqual('A1', b.cells[0].name)
+        self.assertEqual('C6', b.cells[23].name)
+        self.assertEqual('I9', b.cells[80].name)
 
     def test_units(self):
         b = SudokuBoard()
         self.assertTrue(all(len(c.units) == 3 for c in b.cells))
         c2 = b.cell_by_name('C2')
-        self.assertEqual(c2.units[0][0], b.cell_by_name('A2'))
-        self.assertEqual(c2.units[1][2], b.cell_by_name('C3'))
-        self.assertEqual(c2.units[2][8], b.cell_by_name('C3'))
+        self.assertEqual(b.cell_by_name('A2'), c2.units[0][0])
+        self.assertEqual(b.cell_by_name('C3'), c2.units[1][2])
+        self.assertEqual(b.cell_by_name('C3'), c2.units[2][8])
 
     def test_peers(self):
         b = SudokuBoard()
