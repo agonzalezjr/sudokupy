@@ -3,18 +3,36 @@ import collections
 
 
 class SudokuCell:
+    """
+    A cell in a Sudoku puzzle board.
+    """
+
     def __init__(self, name, choices=9):
+        """
+        Creates a Sudoku Cell
+        :param name: the name of the cell (row-column)
+        :param choices: the number of choices the cell can have
+        :return: SudokuCell
+        """
         assert (name is not None and len(name) == 2)
         self.__name = name
+        # string with value '1..choices'
         self.__values = ''.join(str(d) for d in range(1, choices + 1))
         self.__peers = set()
         self.__units = []
 
     def __repr__(self):
-        return self.__name
+        """Row-Column name of the cell (e.g. A1, C7, etc...)"""
+        return self.name
 
     @property
     def name(self):
+        """
+        Row-Column name of the cell (e.g. A1, C7, etc...)
+
+        :returns: name of the cell
+        :rtype: str
+        """
         return self.__name
 
     @property
@@ -30,6 +48,10 @@ class SudokuCell:
         return self.__units
 
     def __add_peers(self, p):
+        """
+        Adds other cell peers to this cell
+        :param p: iterable collection of cells or a single cell to add as a peer
+        """
         if isinstance(p, collections.Iterable):
             map(self.__add_peers, p)
         elif isinstance(p, self.__class__):
@@ -42,36 +64,54 @@ class SudokuCell:
         self.__add_peers(u)
 
     def eliminate(self, value):
+        """
+        Eliminates a value from the possible values of this cell.
+        If after doing the elimination, it checks the cell's units, and
+        if the value is only possible in one cell in the whole unit,
+        it will assign it to that cell.
+        :param value:
+        :return: False if a contradiction is found
+        """
         assert (len(value) == 1)
 
-        # Can't eliminate the last value
+        # Contradiction: can't eliminate the last value!
         if self.values == value:
             return False
+
+        # This is no-op really ...
+        if value not in self.values:
+            return True
 
         self.__values = self.values.replace(value, '')
 
         # Check this cell's units, if there is only one
-        # possibility for some value there now, then assign
-        # that value to that lucky cell
+        # possibility for the eliminated value now, then assign
+        # the value to that lucky cell
         for unit in self.units:
-            for d in '123456789':
-                # d_places is an array of all the cells in the unit
-                # that aren't solved already where value d is a possibility
-                d_places = [cell for cell in unit if d in cell.values]
-                if len(d_places) == 0:
-                    # Contradiction: no place for this value
-                    return False
-                elif len(d_places) == 1 and not d_places[0].is_solved():
-                    # We have only one choice and it's not because it's in
-                    # a cell we already solved. Yay for new information!!
-                    return d_places[0].assign(d)
+            # d_places is an array of all the cells in the unit
+            # that aren't solved already where the value is a possibility
+            d_places = [cell for cell in unit if value in cell.values]
+            if len(d_places) == 0:
+                # Contradiction: there is no place for this value!
+                return False
+            elif len(d_places) == 1 and not d_places[0].is_solved():
+                # We have only one choice and it's not because it's in
+                # a cell we already solved. Yay for new information!!
+                return d_places[0].assign(value)
 
         return True
 
     def assign(self, value):
+        """
+        Assigns a value to a cell.
+        :param value: Either the initial value or a deduced one, but it will be the
+        final value of the cell.
+        It will then eliminate this value from all of this cell's peers as well.
+        :return: False if there is a contradiction
+        """
         assert (len(value) == 1)
 
-        # Can't assign a value that's not a possibility
+        # Contradiction: Can't assign a value that's not a possibility!
         if value not in self.values:
             return False
 
@@ -88,6 +128,7 @@ class SudokuCell:
         return True
 
     def is_solved(self):
+        """ Returns true if the cell is solved """
         return len(self.values) == 1
 
 
