@@ -78,7 +78,7 @@ class SudokuCell:
         if self.values == value:
             return False
 
-        # This is no-op really ...
+        # We already had this information, no need to propagate this further
         if value not in self.values:
             return True
 
@@ -114,6 +114,10 @@ class SudokuCell:
         # Contradiction: Can't assign a value that's not a possibility!
         if value not in self.values:
             return False
+
+        # We already had this information, no need to propagate anything
+        if self.values == value:
+            return True
 
         self.__values = value
 

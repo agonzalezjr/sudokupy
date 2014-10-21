@@ -26,6 +26,7 @@ class SudokuBoard:
         else:
             self.__initial_state = initial_state
 
+
         assert len(self.initial_state) == len(self.ROWS) * len(self.COLUMNS)
 
         # create the cells
@@ -45,6 +46,10 @@ class SudokuBoard:
             for unit in unit_list:
                 if cell in unit:
                     cell.add_unit(unit)
+
+        # Cache this so once we find a solution we don't have to
+        # check all cells anymore to determine the same answer
+        self.__solved = False
 
     @property
     def initial_state(self):
@@ -135,9 +140,12 @@ class SudokuBoard:
                 unit_list.append(thisunit)
 
         return unit_list
+
     def is_solved(self):
         """ Return True if the puzzle is solved """
-        return all(cell.is_solved() for cell in self.cells)
+        if not self.__solved:
+            self.__solved = all(cell.is_solved() for cell in self.cells)
+        return self.__solved
 
     def solve(self, debug_mode=False):
         """
